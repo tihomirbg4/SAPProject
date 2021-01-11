@@ -3,11 +3,21 @@ package Views.Users;
 import Views.View;
 
 public class EditUserView extends View {
-    public int getUserID()
+    public Integer getUserID()
     {
         System.out.println("Enter user ID you want to edit");
-        int userID = Integer.parseInt(scanner.nextLine());
+        Integer userID = null;
+        try {
+            userID = Integer.parseInt(scanner.nextLine());
+            if(userID < 0)
+            {
+                userID = null;
+            }
+        }
+        catch(NumberFormatException e)
+        {
 
+        }
         return userID;
     }
 

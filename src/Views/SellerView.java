@@ -15,9 +15,8 @@ public class SellerView extends View {
         System.out.println("4. Sell product");
         System.out.println("5. Available products overview");
         System.out.println("6. Sold products overview");
-        System.out.println("7. Sold products for specific seller");
-        System.out.println("8. Users overview");
-        System.out.println("9. Logout");
-        System.out.println("10. Exit");
+        System.out.println("7. Sold products overview for selected timed");
+        System.out.println("8. Logout");
+        System.out.println("9. Exit");
     }
 }

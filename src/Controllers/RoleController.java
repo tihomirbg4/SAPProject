@@ -4,26 +4,35 @@ import Models.User;
 import Roles.Role;
 import Roles.RoleManager;
 
-import java.sql.SQLException;
+import java.text.ParseException;
 
 public class RoleController {
-    User user;
+    private UserSession userSession;
 
     public RoleController(User user) {
-        this.user = user;
+        userSession = new UserSession(user);
     }
 
-    public void renderView(User user) throws SQLException {
+    public void renderView() throws ParseException {
         RoleManager roleManager = new RoleManager();
-        if(roleManager.getRole(user) == Role.ADMIN)
-        {
-           AdminPanelController adminPanelController = new AdminPanelController();
-           adminPanelController.printOptions();
-        }
-        else if(roleManager.getRole(user) == Role.SELLER)
-        {
-            SellerPanelController sellerPanelController = new SellerPanelController();
-            sellerPanelController.printOptions();
-        }
+            if(roleManager.getRole(userSession.getUser()) == Role.ADMIN)
+            {
+                AdminPanelController adminPanelController = new AdminPanelController(userSession);
+                adminPanelController.chooseAdminOptions();
+            }
+            else if(roleManager.getRole(userSession.getUser()) == Role.SELLER)
+            {
+                SellerPanelController sellerPanelController = new SellerPanelController(userSession);
+                sellerPanelController.chooseSellerOptions();
+            }
+            else if(roleManager.getRole(userSession.getUser()) == Role.USER)
+            {
+                RegularUserController regularUserController = new RegularUserController();
+                regularUserController.printNotAllowedUser();
+                LoginController loginController = new LoginController();
+                User user = loginController.login();
+                RoleController roleController = new RoleController(user);
+                roleController.renderView();
+            }
     }
 }

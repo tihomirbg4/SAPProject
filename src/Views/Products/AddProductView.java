@@ -14,11 +14,21 @@ public class AddProductView extends View {
         return productName;
     }
 
-    public int getProductStock()
+    public Integer getProductStock()
     {
         System.out.println("Enter product's stock");
-        int productStock = Integer.parseInt(scanner.nextLine());
+        Integer productStock = null;
+        try {
+            productStock = Integer.parseInt(scanner.nextLine());
+            if(productStock < 0)
+            {
+                productStock = null;
+            }
+        }
+        catch(NumberFormatException e)
+        {
 
+        }
         return productStock;
     }
 
@@ -30,10 +40,20 @@ public class AddProductView extends View {
         return productCategory;
     }
 
-    public double getProductPrice()
+    public Double getProductPrice()
     {
         System.out.println("Enter product's price");
-        double productPrice = Double.parseDouble(scanner.nextLine());
+        Double productPrice = null;
+        try {
+            productPrice = Double.parseDouble(scanner.nextLine());
+            if(productPrice < 0)
+            {
+                productPrice = null;
+            }
+        }
+        catch(NumberFormatException e) {
+
+        }
 
         return productPrice;
     }

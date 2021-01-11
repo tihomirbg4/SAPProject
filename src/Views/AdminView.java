@@ -20,7 +20,8 @@ public class AdminView extends View {
         System.out.println("6. Delete seller");
         System.out.println("7. Products overview");
         System.out.println("8. Sellers overview");
-        System.out.println("9. Logout");
-        System.out.println("10. Exit");
+        System.out.println("9. Sold products for specific seller");
+        System.out.println("10. Logout");
+        System.out.println("11. Exit");
     }
 }

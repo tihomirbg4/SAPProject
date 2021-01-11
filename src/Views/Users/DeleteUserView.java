@@ -4,11 +4,21 @@ import Views.View;
 
 public class DeleteUserView extends View {
 
-    public int getUserID()
+    public Integer getUserID()
     {
-        System.out.println("Enter user ID you want to delete");
-        int userID = Integer.parseInt(scanner.nextLine());
+        System.out.println("Enter ID you want to delete");
+        Integer userID = null;
+        try {
+            userID = Integer.parseInt(scanner.nextLine());
+            if(userID < 0)
+            {
+                userID = null;
+            }
+        }
+        catch(NumberFormatException e)
+        {
 
+        }
         return userID;
     }
 

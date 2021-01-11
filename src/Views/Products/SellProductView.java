@@ -4,20 +4,66 @@ import Views.View;
 
 public class SellProductView extends View {
 
-    public int getProductID()
+    public Integer getProductID()
     {
-        System.out.println("Enter product ID");
-        int productID = Integer.parseInt(scanner.nextLine());
+        System.out.println("Enter product ID you want to sell");
+        Integer sellerID = null;
+        try {
+            sellerID = Integer.parseInt(scanner.nextLine());
+            if(sellerID < 0)
+            {
+                sellerID = null;
+            }
+        }
+        catch(NumberFormatException e)
+        {
 
-        return productID;
+        }
+        return sellerID;
     }
 
-    public int getSoldProductQuantity()
+    public Integer getSoldProductQuantity()
     {
         System.out.println("Enter how much you want to sell");
-        int soldProductQuantity = Integer.parseInt(scanner.nextLine());
+        Integer soldProductQuantity = null;
+        try {
+            soldProductQuantity = Integer.parseInt(scanner.nextLine());
+            if(soldProductQuantity < 0)
+            {
+                soldProductQuantity = null;
+            }
+        }
+        catch(NumberFormatException e)
+        {
+
+        }
 
         return soldProductQuantity;
+    }
+
+    public void printSuccessfulSoldProduct(int soldQuantity)
+    {
+        System.out.printf("You sold %d from this product%n", soldQuantity);
+    }
+
+    public void printUnsuccessfulSoldProduct()
+    {
+        System.out.println("Product not found");
+    }
+
+    public void printNotEnoughQuantity(int quantity)
+    {
+        System.out.printf("Available product quantity is %d%n", quantity);
+    }
+
+    public void printInvalidQuantityMessage()
+    {
+        System.out.println("Invalid quantity");
+    }
+
+    public void printInvalidProductID()
+    {
+        System.out.println("Invalid product ID");
     }
 
     public void printSuccessfulSoldProduct()
@@ -25,8 +71,4 @@ public class SellProductView extends View {
         System.out.println("Successful sold product");
     }
 
-    public void printUnsuccessfulSoldProduct()
-    {
-        System.out.println("Unsuccessful sold poduct");
-    }
 }

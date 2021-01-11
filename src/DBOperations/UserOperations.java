@@ -1,7 +1,10 @@
 package DBOperations;
 
 import Models.User;
+import Roles.Role;
+import Security.PasswordManager;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,7 +21,8 @@ public class UserOperations {
         try {
             PreparedStatement ps = connectDB.prepareStatement(verifyLogin);
             ps.setString(1, username);
-            ps.setString(2, password);
+            ps.setString(2, PasswordManager.hashPassword(password));
+            String hashedPassword = PasswordManager.hashPassword(password);
             ResultSet rs = ps.executeQuery();
             while(rs.next())
             {
@@ -37,13 +41,19 @@ public class UserOperations {
         boolean isSuccessful = false;
         Connection con = DbConnection.connect();
         PreparedStatement ps = null;
+        PreparedStatement ps1 = null;
         try {
             String sql = "INSERT INTO users(username, password) VALUES(?, ?)";
+            String sql1 = "INSERT INTO UserRoles(UserID, RoleID) VALUES(?, ?)";
             ps = con.prepareStatement(sql);
             ps.setString(1, user.getUsername());
-            ps.setString(2, user.getPassword());
+            ps.setString(2, PasswordManager.hashPassword(user.getPassword()));
+            ps1 = con.prepareStatement(sql1);
+            ps1.setInt(1, getAutoIncrementValue() + 1);
+            ps1.setInt(2, Role.USER.ordinal() + 1);
             isSuccessful = ps.executeUpdate() == 1;
-        } catch (SQLException e) {
+            ps1.execute();
+        } catch (SQLException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
@@ -58,10 +68,10 @@ public class UserOperations {
             String sql = "UPDATE users SET username = ?, password = ? WHERE ID = ?";
             ps = con.prepareStatement(sql);
             ps.setString(1, user.getUsername());
-            ps.setString(2, user.getPassword());
+            ps.setString(2, PasswordManager.hashPassword(user.getPassword()));
             ps.setInt(3, user.getUserID());
             isSuccessful = ps.executeUpdate() == 1;
-        } catch (SQLException e) {
+        } catch (SQLException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
@@ -76,12 +86,18 @@ public class UserOperations {
         }
         Connection con = DbConnection.connect();
         PreparedStatement ps = null;
+        PreparedStatement ps1 = null;
         try {
             String sql = "DELETE from users WHERE ID = ? ";
+            String sql1 = "DELETE FROM UserRoles WHERE UserID = ?";
             ps = con.prepareStatement(sql);
+            ps1 = con.prepareStatement(sql1);
             ps.setInt(1, user.getUserID());
+            ps1.setInt(1, user.getUserID());
             isSuccessful = ps.executeUpdate() == 1;
+            ps1.execute();
             ps.close();
+            ps1.close();
             con.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -96,9 +112,10 @@ public class UserOperations {
         ResultSet rs = null;
         User user = null;
         try {
-            String sql = "SELECT * FROM users WHERE ID = ?";
+            String sql = "SELECT users.username, users.password, users.ID, UserRoles.UserID, UserRoles.RoleID FROM users INNER JOIN UserRoles ON UserRoles.UserID = ? AND users.ID = ? WHERE UserRoles.RoleID = 3";
             ps = con.prepareStatement(sql);
             ps.setInt(1, userID);
+            ps.setInt(2, userID);
             rs = ps.executeQuery();
             if (rs.next()) {
                 user = new User(rs.getString(1), rs.getString(2), rs.getInt(3));

@@ -2,21 +2,22 @@ package Controllers;
 
 import DBOperations.ProductOperations;
 import DBOperations.SellerOperations;
-import Models.Product;
-import Models.Seller;
+import Models.User;
 import Views.Sellers.*;
+import Views.Validations.ProductValidationView;
 
 public class SellerController {
-    public Seller addSeller()
+    ProductValidationView productInputValidation = new ProductValidationView();
+    public void addSeller()
     {
         AddSellerView addSellerView = new AddSellerView();
-        Seller seller = null;
+        User seller = null;
 
         while(seller == null)
         {
             String sellerUsername = addSellerView.getUsername();
             String sellerPassword = addSellerView.getSellerPassword();
-            seller = new Seller(sellerUsername, sellerPassword, SellerOperations.getAutoIncrementValue());
+            seller = new User(sellerUsername, sellerPassword, SellerOperations.getAutoIncrementValue());
             boolean isSuccessful = SellerOperations.addSeller(seller);
             if(isSuccessful)
                 addSellerView.printSuccessfulAddedSeller();
@@ -25,53 +26,80 @@ public class SellerController {
 
         }
 
-        return seller;
     }
 
-    public Seller editSeller()
-    {
+    public void editSeller() {
         EditSellerView editSellerView = new EditSellerView();
-        Seller seller = null;
+        User seller = null;
 
-        while(seller == null)
-        {
-            int sellerID = editSellerView.getSellerID();
-            if(SellerOperations.findByID(sellerID) != null)
-            {
-                String sellerUsername = editSellerView.getSellerUsername();
-                String sellerPassword = editSellerView.getSellerPassword();
-                seller = new Seller(sellerUsername, sellerPassword, sellerID);
-                boolean isSuccessful = SellerOperations.updateSeller(seller);
-                if(isSuccessful)
-                    editSellerView.printSuccessfulEditedSeller();
-                else
-                    editSellerView.printUnsuccessfulEditedSeller();
+        while (seller == null) {
+            Integer sellerID = editSellerView.getSellerID();
+            while (sellerID == null || SellerOperations.findByID(sellerID) == null) {
+                if (sellerID != null) {
+                    if (SellerOperations.findByID(sellerID) != null) {
+                        String sellerUsername = editSellerView.getSellerUsername();
+                        String sellerPassword = editSellerView.getSellerPassword();
+                        seller = new User(sellerUsername, sellerPassword, sellerID);
+                        boolean isSuccessful = SellerOperations.updateSeller(seller);
+                        if (isSuccessful)
+                            editSellerView.printSuccessfulEditedSeller();
+                        else
+                            editSellerView.printUnsuccessfulEditedSeller();
+                    } else {
+                        editSellerView.printSellerNotFound();
+                    }
+                } else {
+                    productInputValidation.printEnterValidSellerID();
+                }
+
+                sellerID = editSellerView.getSellerID();
             }
-            else
-            {
-                editSellerView.printNotFoundID();
+            if(SellerOperations.findByID(sellerID) == null) {
+                editSellerView.printSellerNotFound();
             }
+            else {
+                if (SellerOperations.findByID(sellerID) != null) {
+                    String sellerUsername = editSellerView.getSellerUsername();
+                    String sellerPassword = editSellerView.getSellerPassword();
+                    seller = new User(sellerUsername, sellerPassword, sellerID);
+                    boolean isSuccessful = SellerOperations.updateSeller(seller);
+                    if (isSuccessful)
+                        editSellerView.printSuccessfulEditedSeller();
+                    else
+                        editSellerView.printUnsuccessfulEditedSeller();
+                } else {
+                    editSellerView.printSellerNotFound();
+                }
+            }
+
         }
-
-        return seller;
     }
 
     public void deleteSeller()
     {
         DeleteSellerView deleteSellerView = new DeleteSellerView();
-        Seller seller = null;
-        while(seller == null)
-        {
-            int sellerID = deleteSellerView.getSellerID();
-            seller = SellerOperations.findByID(sellerID);
+        User seller = null;
+        while(seller == null) {
+            Integer sellerID = deleteSellerView.getSellerID();
+            while (sellerID == null || SellerOperations.findByID(sellerID) == null) {
+                if (sellerID == null) {
+                    productInputValidation.printEnterValidSellerID();
+                } else {
+                    deleteSellerView.printUnsuccessfulDeletedSeller();
+                }
 
-            if(SellerOperations.deleteSeller(seller))
-            {
-                deleteSellerView.printSuccessfulDeletedSeller();
+                sellerID = deleteSellerView.getSellerID();
             }
-            else
-            {
-                deleteSellerView.printUnsuccessfulDeletedSeller();
+
+            seller = SellerOperations.findByID(sellerID);
+            if(seller != null) {
+                boolean isSuccessful = SellerOperations.deleteSeller(seller);
+                if(isSuccessful) {
+                    deleteSellerView.printSuccessfulDeletedSeller();
+                }
+                else {
+                    deleteSellerView.printUnsuccessfulDeletedSeller();
+                }
             }
         }
     }
@@ -81,5 +109,6 @@ public class SellerController {
         sellersOverview.printListMessage();
         SellerOperations.readSellers();
     }
+
 
 }

@@ -5,11 +5,21 @@ import org.w3c.dom.ls.LSOutput;
 
 public class EditSellerView extends View {
 
-    public int getSellerID()
+    public Integer getSellerID()
     {
         System.out.println("Enter seller ID you want to edit");
-        int sellerID = Integer.parseInt(scanner.nextLine());
+        Integer sellerID = null;
+        try {
+            sellerID = Integer.parseInt(scanner.nextLine());
+            if(sellerID < 0)
+            {
+                sellerID = null;
+            }
+        }
+        catch(NumberFormatException e)
+        {
 
+        }
         return sellerID;
     }
 
@@ -39,8 +49,9 @@ public class EditSellerView extends View {
         System.out.println("Unsuccessful edited seller");
     }
 
-    public void printNotFoundID()
+    public void printSellerNotFound()
     {
-        System.out.println("ID not found");
+        System.out.println("Seller not found");
     }
+
 }

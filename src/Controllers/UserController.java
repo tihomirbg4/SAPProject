@@ -2,14 +2,14 @@ package Controllers;
 
 import DBOperations.SellerOperations;
 import DBOperations.UserOperations;
-import Models.Seller;
 import Models.User;
-import Views.Sellers.DeleteSellerView;
 import Views.Users.AddUserView;
 import Views.Users.DeleteUserView;
 import Views.Users.EditUserView;
+import Views.Validations.ProductValidationView;
 
 public class UserController {
+    ProductValidationView productInputValidation = new ProductValidationView();
     public User addUser()
     {
         AddUserView addUserView = new AddUserView();
@@ -37,21 +37,28 @@ public class UserController {
 
         while(user == null)
         {
-            int userID = editUserView.getUserID();
-            if(UserOperations.findByID(userID) != null)
+            Integer userID = editUserView.getUserID();
+            if(userID != null)
             {
-                String username = editUserView.getUsername();
-                String password = editUserView.getPassword();
-                user = new User(username, password, userID);
-                boolean isSuccessful = UserOperations.updateUser(user);
-                if(isSuccessful)
-                    editUserView.printSuccessfulEditedUser();
+                if(UserOperations.findByID(userID) != null)
+                {
+                    String username = editUserView.getUsername();
+                    String password = editUserView.getPassword();
+                    user = new User(username, password, userID);
+                    boolean isSuccessful = UserOperations.updateUser(user);
+                    if(isSuccessful)
+                        editUserView.printSuccessfulEditedUser();
+                    else
+                        editUserView.printUnsuccessfulEditedUser();
+                }
                 else
-                    editUserView.printUnsuccessfulEditedUser();
+                {
+                    editUserView.printNotFoundID();
+                }
             }
             else
             {
-                editUserView.printNotFoundID();
+                productInputValidation.printEnterValidUserID();
             }
         }
 
@@ -63,15 +70,29 @@ public class UserController {
         DeleteUserView deleteUserView = new DeleteUserView();
         User user = null;
 
-        while(user == null)
-        {
-            int userID = deleteUserView.getUserID();
-            user = UserOperations.findByID(userID);
+        while(user == null) {
+            Integer userID = deleteUserView.getUserID();
+            while (userID == null || UserOperations.findByID(userID) == null) {
+                if (userID == null) {
+                    productInputValidation.printEnterValidUserID();
+                } else {
+                    deleteUserView.printUnsuccessfulDeletedUse();
+                }
 
-            if(UserOperations.deleteUser(user))
-                deleteUserView.printSuccessfulDeletedUser();
-            else
-                deleteUserView.printUnsuccessfulDeletedUse();
+                userID = deleteUserView.getUserID();
+            }
+
+            user = UserOperations.findByID(userID);
+            if(user != null) {
+                boolean isSuccessful = UserOperations.deleteUser(user);
+                if(isSuccessful) {
+                    deleteUserView.printSuccessfulDeletedUser();
+                }
+                else {
+                    deleteUserView.printUnsuccessfulDeletedUse();
+                }
+            }
         }
     }
+
 }

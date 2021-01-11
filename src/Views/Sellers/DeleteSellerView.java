@@ -4,12 +4,22 @@ import Views.View;
 
 public class DeleteSellerView extends View {
 
-    public int getSellerID()
+    public Integer getSellerID()
     {
         System.out.println("Enter seller ID you want to delete");
-        int sellerID = Integer.parseInt(scanner.nextLine());
+        Integer productID = null;
+        try {
+            productID = Integer.parseInt(scanner.nextLine());
+            if(productID < 0)
+            {
+                productID = null;
+            }
+        }
+        catch(NumberFormatException e)
+        {
 
-        return sellerID;
+        }
+        return productID;
     }
 
     public void printSuccessfulDeletedSeller()
@@ -21,4 +31,6 @@ public class DeleteSellerView extends View {
     {
         System.out.println("Seller not found");
     }
+
+
 }

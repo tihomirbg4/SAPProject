@@ -1,26 +1,36 @@
 package DBOperations;
-
+import Models.Order;
 import Models.Product;
-import Models.Seller;
+import Models.User;
+import Roles.Role;
+import Security.PasswordManager;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SellerOperations {
-    public static boolean addSeller(Seller seller) {
+    public static boolean addSeller(User seller) {
         boolean isSuccessful = false;
         Connection con = DbConnection.connect();
         PreparedStatement ps;
+        PreparedStatement ps1;
         try {
-            String sql = "INSERT INTO Sellers(sellerUsername, sellerPassword) VALUES(?, ?)";
+            String sql = "INSERT INTO users(username, password) VALUES(?, ?)";
+            String sql1 = "INSERT INTO UserRoles(UserID, RoleID) VALUES(?, ?)";
             ps = con.prepareStatement(sql);
-            ps.setString(1, seller.getName());
-            ps.setString(2, seller.getPassword());
+            ps1 = con.prepareStatement(sql1);
+            ps.setString(1, seller.getUsername());
+            ps.setString(2, PasswordManager.hashPassword(seller.getPassword()));
+            ps1.setInt(1, getAutoIncrementValue() +1);
+            ps1.setInt(2, Role.SELLER.ordinal() + 1);
             isSuccessful = ps.executeUpdate() == 1;
-        } catch (SQLException e) {
+            ps1.execute();
+        } catch (SQLException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
@@ -33,7 +43,7 @@ public class SellerOperations {
         Connection connection = DbConnection.connect();
         PreparedStatement ps;
         try {
-            String sql = "SELECT seq FROM sqlite_sequence WHERE name = 'Sellers'";
+            String sql = "SELECT seq FROM sqlite_sequence WHERE name = 'users'";
             ps = connection.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while(rs.next())
@@ -50,48 +60,50 @@ public class SellerOperations {
         return autoIncrementValue;
     }
 
-    public static boolean updateSeller(Seller seller) {
+    public static boolean updateSeller(User seller) {
         boolean isSuccessful = false;
         Connection con = DbConnection.connect();
         PreparedStatement ps;
         try {
-            String sql = "UPDATE Sellers SET sellerUsername = ?, sellerPassword = ? WHERE sellerID = ?";
+            String sql = "UPDATE users SET username = ?, password = ? WHERE ID = ?";
             ps = con.prepareStatement(sql);
-            ps.setString(1, seller.getName());
-            ps.setString(2, seller.getPassword());
-            ps.setInt(3, seller.getSellerID());
+            ps.setString(1, seller.getUsername());
+            ps.setString(2, PasswordManager.hashPassword(seller.getPassword()));
+            ps.setInt(3, seller.getUserID());
             isSuccessful = ps.executeUpdate() == 1;
-        } catch (SQLException e) {
-            System.out.println(e.toString());
+        } catch (SQLException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
         }
 
         return isSuccessful;
     }
 
-    public static Seller findByID(int sellerID) {
+    public static User findByID(int sellerID) {
+
         Connection con = DbConnection.connect();
         PreparedStatement ps = null;
         ResultSet rs = null;
-        Seller seller = null;
+        User seller = null;
         try {
-            String sql = "SELECT * FROM Sellers WHERE sellerID = ?";
+            String sql = "SELECT users.username, users.password, users.ID, UserRoles.UserID, UserRoles.RoleID FROM users INNER JOIN UserRoles ON UserRoles.UserID = ? AND users.ID = ? WHERE UserRoles.RoleID = 2";
             ps = con.prepareStatement(sql);
             ps.setInt(1, sellerID);
+            ps.setInt(2, sellerID);
             rs = ps.executeQuery();
             if (rs.next()) {
-                seller = new Seller(rs.getString(1), rs.getString(2), rs.getInt(3));
+                seller = new User(rs.getString(1), rs.getString(2), rs.getInt(3));
 
                 rs.close();
                 ps.close();
                 con.close();
             }
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
         }
         return seller;
     }
 
-    public static boolean deleteSeller(Seller seller) {
+    public static boolean deleteSeller(User seller) {
         boolean isSuccessful = false;
         if(seller == null)
         {
@@ -99,11 +111,16 @@ public class SellerOperations {
         }
         Connection con = DbConnection.connect();
         PreparedStatement ps = null;
+        PreparedStatement ps1 = null;
         try {
-            String sql = "DELETE from Sellers WHERE SellerID = ? ";
+            String sql = "DELETE from users WHERE ID = ? ";
+            String sql1 = "DELETE FROM UserRoles WHERE UserID = ?";
             ps = con.prepareStatement(sql);
-            ps.setInt(1, seller.getSellerID());
+            ps1 = con.prepareStatement(sql1);
+            ps.setInt(1, seller.getUserID());
+            ps1.setInt(1, seller.getUserID());
             isSuccessful = ps.executeUpdate() == 1;
+            ps1.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -125,12 +142,14 @@ public class SellerOperations {
         ResultSet rs = null;
 
         try {
-            String sql = "SELECT * from Sellers";
+            String sql = "SELECT username, ID from users INNER JOIN UserRoles ON users.ID = UserRoles.UserID WHERE RoleID = 2";
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
             while (rs.next()) {
-                String sellerName = rs.getString("sellerUsername");
-                System.out.printf("%s%n", sellerName);
+                String sellerName = rs.getString("username");
+                int sellerID = rs.getInt("ID");
+                System.out.printf("%s with ID %d%n", sellerName, sellerID);
+
             }
         } catch (SQLException e) {
             System.out.println(e.toString());
@@ -141,10 +160,32 @@ public class SellerOperations {
                 ps.close();
                 con.close();
             } catch (SQLException e) {
-                System.out.println(e.toString());
+                e.printStackTrace();
             }
         }
 
+    }
+    public static User findSellerInSoldProducts(int sellerID) {
+        Connection con = DbConnection.connect();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        User seller = null;
+        try {
+            String sql = "SELECT * FROM SoldProducts WHERE sellerID = ?";
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, sellerID);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                seller = new User(rs.getString(1), rs.getString(2), rs.getInt(3));
+
+                rs.close();
+                ps.close();
+                con.close();
+            }
+        } catch (SQLException e) {
+           e.printStackTrace();
+        }
+        return seller;
     }
 
 }

@@ -19,7 +19,6 @@ public class LoginController {
              if(loggedUser == null)
              loginView.printUnsuccessfulLogin();
         }
-        loginView.printSuccessfulLogin(loggedUser);
 
         return loggedUser;
     }

@@ -4,11 +4,21 @@ import Views.View;
 
 public class EditProductView extends View {
 
-    public int getProductID()
+    public Integer getProductID()
     {
-        System.out.println("Enter item's ID you want to edit");
-        int productID = Integer.parseInt(scanner.nextLine());
+        System.out.println("Enter product's ID");
+        Integer productID = null;
+        try {
+            productID = Integer.parseInt(scanner.nextLine());
+            if(productID < 0)
+            {
+                productID = null;
+            }
+        }
+        catch(NumberFormatException e)
+        {
 
+        }
         return productID;
     }
 
@@ -20,26 +30,46 @@ public class EditProductView extends View {
         return productName;
     }
 
-    public int getProductStock()
+    public Integer getProductQuantity()
     {
-        System.out.println("Enter product's stock");
-        int productStock = Integer.parseInt(scanner.nextLine());
+        System.out.println("Enter new product quantity");
+        Integer productQuantity = null;
+        try {
+            productQuantity = Integer.parseInt(scanner.nextLine());
+            if(productQuantity < 0)
+            {
+                productQuantity = null;
+            }
+        }
+        catch(NumberFormatException e)
+        {
 
-        return productStock;
+        }
+        return productQuantity;
     }
 
     public String getProductCategory()
     {
-        System.out.println("Enter product category");
+        System.out.println("Enter new product category");
         String productCategory = scanner.nextLine();
 
         return productCategory;
     }
 
-    public double getProductPrice()
+    public Double getNewProductPrice()
     {
-        System.out.println("Enter product price");
-        double productPrice = Double.parseDouble(scanner.nextLine());
+        System.out.println("Enter product's price");
+        Double productPrice = null;
+        try {
+            productPrice = Double.parseDouble(scanner.nextLine());
+            if(productPrice < 0)
+            {
+                productPrice = null;
+            }
+        }
+        catch(NumberFormatException e) {
+
+        }
 
         return productPrice;
     }
@@ -53,4 +83,10 @@ public class EditProductView extends View {
     {
         System.out.println("Unsuccessful edited product");
     }
+
+    public void printProductNotFound()
+    {
+        System.out.println("Product not found");
+    }
+
 }
